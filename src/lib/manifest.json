@@ -1,18 +1,18 @@
 {
-  "_vendor-CyMmVI6Y.js": {
-    "file": "static/vendor-CyMmVI6Y.js",
+  "_vendor-3z-X1xu5.js": {
+    "file": "static/vendor-3z-X1xu5.js",
     "name": "vendor"
   },
   "src/client.tsx": {
-    "file": "static/client-DHV1Rs29.js",
+    "file": "static/client-FGYhVkTw.js",
     "name": "client",
     "src": "src/client.tsx",
     "isEntry": true,
     "imports": [
-      "_vendor-CyMmVI6Y.js"
+      "_vendor-3z-X1xu5.js"
     ],
     "css": [
-      "static/client-IzjerTXb.css"
+      "static/client-CFtk4DDR.css"
     ]
   }
 }

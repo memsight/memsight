@@ -1,4 +1,4 @@
-name = "hono-react-ssr-shadcn-ui"
+name = "memsight"
 pages_build_output_dir = "./dist"
 compatibility_date = "2024-04-22"
 
@@ -13,10 +13,10 @@ compatibility_date = "2024-04-22"
 # binding = "MY_BUCKET"
 # bucket_name = "my-bucket"
 
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "my-database"
-# database_id = ""
+[[d1_databases]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "memsight"
+database_id = "793c5b27-bea5-4f1a-970a-2c4136b04f19"
 
 # [ai]
 # binding = "AI"

@@ -1,12 +1,14 @@
 import build from '@hono/vite-cloudflare-pages'
 import devServer from '@hono/vite-dev-server'
 import adapter from '@hono/vite-dev-server/cloudflare'
+import preserveDirectives from 'rollup-preserve-directives'
 import { defineConfig } from 'vite'
 import path from 'path'
 
 export default defineConfig(({ mode }) => {
   if (mode === 'client') {
     return {
+      plugins: [preserveDirectives()],
       build: {
         manifest: true,
         assetsDir: 'static',
@@ -14,11 +16,10 @@ export default defineConfig(({ mode }) => {
           input: './src/client.tsx',
           output: {
             entryFileNames: 'static/client-[hash].js',
-            manualChunks: {
-              vendor: [
-                'react',
-                'react-dom',
-              ]
+            manualChunks: (id) => {
+              if (id.includes('node_modules')) {
+                return 'vendor'
+              }
             }
           },
         },
@@ -32,6 +33,7 @@ export default defineConfig(({ mode }) => {
   } else {
     return {
       plugins: [
+        preserveDirectives(),
         build(),
         devServer({
           adapter,
@@ -39,7 +41,16 @@ export default defineConfig(({ mode }) => {
         }),
       ],
       ssr: {
-        external: ['react', 'react-dom'],
+        external: [
+          'react',
+          'react-dom',
+          'axios',
+          'usehooks-ts',
+          '@prisma',
+          '@prisma/client',
+          '@prisma/debug',
+          'react-infinite-scroller'
+        ],
       },
       resolve: {
         alias: {

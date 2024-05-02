@@ -1,5 +1,13 @@
-import {} from 'hono'
+import { } from 'hono'
+import { PrismaClient } from '@prisma/client'
 
+interface Token {
+  id: number,
+  name: string
+  secret: string
+  token?: string
+  created_at?: number
+}
 interface ViewMeta {
   title: string,
   manifest?: Manifest,
@@ -22,10 +30,41 @@ interface Manifest {
   [key: string]: ManifestItem
 }
 
+interface User {
+  avatar: string
+  email: string
+  secret: string
+  exp: number
+  iat: number
+  iss: string
+  jti: string
+  name: string
+  nbf: number
+  sub: string
+  uid: number
+}
+
+type Bindings = {
+  HOME_URL: string
+  AUTH_KEY: string
+  LOGIN_URL: string
+  LOGOUT_URL: string
+  API_SECRET: string
+  UPSTASH_VECTOR_URL: string
+  UPSTASH_VECTOR_TOKEN: string
+}
+
+type Variables = {
+  user: User
+}
 
 declare module 'hono' {
   interface Context {
-    view(name:string, data: ViewData): Response | Promise<Response>
+    view(name: string, data: ViewData): Response | Promise<Response>
+    prisma: PrismaClient
+  }
+  interface ContextVariableMap {
+    user: User
   }
 }
 
@@ -38,6 +77,9 @@ declare module '@hono/react-renderer' {
 
 declare global {
   interface Window {
-      _hono_view: ViewData;
+    _hono_view: ViewData;
+  }
+  interface BigInt {
+    toJSON(): number
   }
 }

@@ -1,6 +1,7 @@
 import isProd from "../config/is_prod"
 import { Manifest, ManifestItem, ViewData } from "../global"
 import { Toaster } from "@/components/ui/sonner"
+import { Provider } from 'jotai'
 
 type LayoutProps = {
     children: React.ReactNode,
@@ -36,15 +37,18 @@ export default function App({ children, view, manifest }: LayoutProps) {
     return (
         <html>
             <head>
+                <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <title>{view.meta.title}</title>
                 {cssDoms}
                 <script dangerouslySetInnerHTML={{__html: viewScript}} />
                 {!isProd &&<script type="module" src="http://localhost:5174/src/client.tsx"></script>}
             </head>
             <body>
-                {children}
-                <Toaster richColors />
-                {scriptDoms}
+                <Provider>
+                    {children}
+                    <Toaster richColors />
+                    {scriptDoms}
+                </Provider>
             </body>
         </html>
     )

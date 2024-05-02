@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Note {
+  id           Int @id @default(autoincrement())
+  user_id      Int
+  uri_hash     String
+  url          String
+  length       Int
+  title        String
+  site_name    String
+  lang         String
+  dir          String
+  byline       String
+  excerpt      String
+  content      String
+  text_content String
+  markdown     String
+  published_at String
+  description  String
+  image        String
+  opengraph    String
+  wait_timeout Int
+  created_at   Int
+
+  @@index([user_id], name: "idx_notes_user_id")
+  @@index([uri_hash], name: "idx_notes_uri_hash")
+  @@map("notes")
+}
+
+model Token {
+  id         Int @id @default(autoincrement())
+  user_id    Int
+  name       String
+  secret     String
+  created_at Int
+
+  @@index([user_id], name: "idx_tokens_user_id")
+  @@map("tokens")
+}
