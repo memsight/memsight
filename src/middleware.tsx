@@ -4,7 +4,7 @@ import manifest from './lib/manifest.json'
 import { getCookie } from "hono/cookie"
 import { verify } from 'hono/jwt'
 import { createMiddleware } from "hono/factory"
-import { PrismaClient, Token } from "@prisma/client"
+import { PrismaClient, Token } from "@prisma/client/edge"
 import { PrismaD1 } from '@prisma/adapter-d1'
 
 let prismaCli: PrismaClient | undefined
