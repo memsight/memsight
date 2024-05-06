@@ -7,6 +7,8 @@ import { CreateToken, ResetToken, Home, ListTokens, DeleteToken, ApiSetting } fr
 import { init } from './lib/init'
 import { CreateNote, NoteHome } from './handlers/note'
 import { Logout } from './handlers/auth'
+import { WhiteListCreate, WhiteListDelete, WhiteListHome, WhiteListShow } from './handlers/white_list'
+import { Download, Upload } from './handlers/oss'
 
 init()
 initView()
@@ -21,16 +23,24 @@ app.use(Prisma)
 app.use(ViewRenderer)
 app.use('/dashboard/*', SimpleAuth)
 app.use('/api/tokens/*', SimpleAuth)
+app.use('/api/white-list/*', SimpleAuth)
 
 app.get('/', Home)
 app.post('/auth/logout', Logout)
 app.get('/dashboard/api/settings', ApiSetting)
 app.get('/dashboard', NoteHome)
 app.get('/dashboard/notes', NoteHome)
+app.get('/dashboard/white-list', WhiteListHome)
+app.get('/dashboard/white-list/:wid', WhiteListShow)
+app.post('/api/upload', Upload)
+app.get('/file/:name', Download)
 app.get('/api/tokens', ListTokens)
 app.post('/api/tokens', CreateToken)
 app.put('/api/tokens/:id', ResetToken)
 app.delete('/api/tokens/:id', DeleteToken)
+app.post('/api/white-list', WhiteListCreate)
+app.delete('/api/white-list/:wid', WhiteListDelete)
+
 app.post('/api/notes', ApiAuth, CreateNote)
 app.get('/api/notes', ApiAuth, NoteHome)
 

@@ -61,6 +61,7 @@ export const NoteHome: Handler = async (c) => {
         orderBy: {
             id: 'desc'
         },
+        skip: 1,
         take,
     })
     if (idList.length > 0) {

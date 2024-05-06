@@ -22,7 +22,7 @@ export default function Hello({ children, req_url, ...props }: AppProps) {
         toast.warning("This is for test only, not implemented.")
     }
     return <Dashboard url={req_url} {...props}>
-        <div className="w-full min-h-full flex flex-col justify-center items-center bg-gradient-to-r from-rose-100 to-teal-100">
+        <div className="w-full min-h-full flex flex-col justify-center items-center">
             <Card className="mx-auto max-w-sm">
                 <CardHeader>
                     <CardTitle className="text-xl">Sign Up</CardTitle>

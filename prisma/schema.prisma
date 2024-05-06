@@ -12,7 +12,7 @@ datasource db {
 }
 
 model Note {
-  id           Int @id @default(autoincrement())
+  id           Int    @id @default(autoincrement())
   user_id      Int
   uri_hash     String
   url          String
@@ -39,7 +39,7 @@ model Note {
 }
 
 model Token {
-  id         Int @id @default(autoincrement())
+  id         Int    @id @default(autoincrement())
   user_id    Int
   name       String
   secret     String
@@ -47,4 +47,18 @@ model Token {
 
   @@index([user_id], name: "idx_tokens_user_id")
   @@map("tokens")
+}
+
+model WhiteList {
+  id          Int    @id @default(autoincrement())
+  user_id     Int
+  user_name   String
+  user_avatar String
+  name        String
+  banner      String
+  desc        String
+  content     String
+  created_at  Int
+
+  @@map("white_lists")
 }

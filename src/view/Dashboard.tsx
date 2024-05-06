@@ -3,6 +3,7 @@ import {
     Brain,
     PanelLeft,
     Webhook,
+    ListChecks,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -32,7 +33,7 @@ type AppProps = {
 
 export default function Dashboard({ children, url, avatar, ...props }: AppProps) {
     return (
-        <div className="flex min-h-screen w-full flex-col bg-muted/40" {...props}>
+        <div className="flex min-h-screen w-full flex-col bg-gradient-to-r from-rose-100 to-teal-100" {...props}>
             <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
                 <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
                     <a
@@ -54,6 +55,20 @@ export default function Dashboard({ children, url, avatar, ...props }: AppProps)
                                 </a>
                             </TooltipTrigger>
                             <TooltipContent side="right">Dashboard</TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                    <TooltipProvider delayDuration={0}>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <a
+                                    href="/dashboard/white-list"
+                                    className={cn("flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:text-foreground md:h-8 md:w-8", url === '/dashboard/white-list' ? 'bg-accent text-accent-foreground':'text-muted-foreground')}
+                                >
+                                    <ListChecks className="h-5 w-5" />
+                                    <span className="sr-only">White Lists</span>
+                                </a>
+                            </TooltipTrigger>
+                            <TooltipContent side="right">White Lists</TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
                     <TooltipProvider delayDuration={0}>
@@ -118,14 +133,21 @@ export default function Dashboard({ children, url, avatar, ...props }: AppProps)
                                 </a>
                                 <a
                                     href="/dashboard"
-                                    className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+                                    className={cn("flex items-center gap-4 px-2.5", url === '/dashboard' ? 'text-foreground':'text-muted-foreground hover:text-foreground')}
                                 >
                                     <Home className="h-5 w-5" />
                                     Dashboard
                                 </a>
                                 <a
+                                    href="/dashboard/white-list"
+                                    className={cn("flex items-center gap-4 px-2.5", url === '/dashboard/white-list' ? 'text-foreground':'text-muted-foreground hover:text-foreground')}
+                                >
+                                    <ListChecks className="h-5 w-5" />
+                                    White Lists
+                                </a>
+                                <a
                                     href="/dashboard/api/settings"
-                                    className="flex items-center gap-4 px-2.5 text-foreground"
+                                    className={cn("flex items-center gap-4 px-2.5", url === '/dashboard/api/settings' ? 'text-foreground':'text-muted-foreground hover:text-foreground')}
                                 >
                                     <Webhook className="h-5 w-5" />
                                     API Settings
