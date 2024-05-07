@@ -1,5 +1,6 @@
 import { } from 'hono'
-import { PrismaClient } from '@prisma/client'
+import { DrizzleD1Database } from 'drizzle-orm/d1'
+import * as DrizzleSchema from './schema/schema'
 
 interface Token {
   id: number,
@@ -7,6 +8,7 @@ interface Token {
   secret: string
   token?: string
   created_at?: number
+  createdAt?: number
 }
 interface ViewMeta {
   title: string,
@@ -44,6 +46,26 @@ interface User {
   uid: number
 }
 
+interface ListNote {
+  id: number
+  url: string
+  title: string
+  description: string
+  image: string
+  excerpt: string
+}
+
+interface WhiteList {
+  id: number
+  name: string
+  userName: string
+  userAvatar: string
+  banner: string
+  desc: string
+  content: string
+  createdAt: number
+}
+
 type Bindings = {
   HOME_URL: string
   AUTH_KEY: string
@@ -61,7 +83,7 @@ type Variables = {
 declare module 'hono' {
   interface Context {
     view(name: string, data: ViewData): Response | Promise<Response>
-    prisma: PrismaClient
+    db: DrizzleD1Database<typeof DrizzleSchema>
   }
   interface ContextVariableMap {
     user: User

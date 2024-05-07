@@ -1,7 +1,7 @@
 'use client'
 import { toast } from "sonner"
 import Dashboard from "./Dashboard"
-import { WhiteList as Model } from "@prisma/client"
+import { WhiteList as Model } from '@/global'
 import WhiteListForm from "@/components/WhiteListForm"
 import { useCallback, useState } from "react"
 import { useHydrateAtoms } from "jotai/utils"

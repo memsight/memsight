@@ -4,24 +4,24 @@ import Dashboard from "./Dashboard"
 import { useAtom } from 'jotai'
 import { useHydrateAtoms } from 'jotai/utils'
 import { notesAtom } from "@/store"
-import { Note as NoteModel } from "@prisma/client"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import InfiniteScroll from 'react-infinite-scroller'
 import { useCallback, useState } from "react"
 import axios from "axios"
 import Empty from "@/components/Empty"
+import { ListNote } from "@/global"
 
 type AppProps = {
     children: React.ReactNode
     req_url: string,
     search: string,
-    notes?: NoteModel[]
+    notes?: ListNote[]
 }
 
 export default function Note({ children, req_url, search, ...props }: AppProps) {
     const [hasMore, setHasMore] = useState(true)
-    const data:NoteModel[] = props.notes || []
+    const data:ListNote[] = props.notes || []
     const lastNoteId = data.length > 0 ? data[data.length - 1].id : 0
     const [lastId, setLastId] = useState(lastNoteId)
     useHydrateAtoms([[notesAtom, data]])

@@ -1,13 +1,14 @@
-import { Token, User, ViewData } from "./global"
+import { User, ViewData } from "./global"
 import { getViewByName } from "./renderer"
 import manifest from './lib/manifest.json'
 import { getCookie } from "hono/cookie"
 import { verify } from 'hono/jwt'
 import { createMiddleware } from "hono/factory"
-import { PrismaClient } from "@prisma/client"
-import { PrismaD1 } from '@prisma/adapter-d1'
+import { drizzle, DrizzleD1Database } from 'drizzle-orm/d1'
+import * as DrizzleSchema from './schema/schema'
+import { eq, and } from 'drizzle-orm'
 
-let prismaCli: PrismaClient | undefined
+let drizzleCli: DrizzleD1Database<typeof DrizzleSchema> | undefined
 
 export const ViewRenderer = createMiddleware(async (c, next) => {
     c.view = (name: string, view: ViewData) => {
@@ -20,13 +21,12 @@ export const ViewRenderer = createMiddleware(async (c, next) => {
     await next()
 })
 
-export const Prisma = createMiddleware(async (c, next) => {
-    if (!prismaCli) {
-        const adapter = new PrismaD1(c.env.DB)
-        prismaCli = new PrismaClient({ adapter })
-        c.prisma = prismaCli
-        console.info('init prisma client')
+export const Drizzle = createMiddleware(async (c, next) => {
+    if (!drizzleCli) {
+        drizzleCli = drizzle(c.env.DB, { schema: DrizzleSchema});
+        console.info('init drizzle client')
     }
+    c.db = drizzleCli
     await next()
 })
 
@@ -78,15 +78,11 @@ export const ApiAuth = createMiddleware(async (c, next) => {
     // validate the auth token
     try {
         const user:User = await verify(authToken, c.env.API_SECRET)
-        const token:Token|null = await c.prisma.token.findFirst({
-            where: {
-                user_id: {
-                    equals: user.uid
-                },
-                secret: {
-                    equals: user.secret
-                }
-            }
+        const token = await c.db.query.tokens.findFirst({
+            where: and(
+                eq(DrizzleSchema.tokens.userId, user.uid),
+                eq(DrizzleSchema.tokens.secret, user.secret)
+            ),
         })
         if (!token) {
             return c.json({

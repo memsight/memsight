@@ -61,7 +61,7 @@ export default function ApiSetting({ children, req_url, ...props }: AppProps) {
                             <TableCell className="hidden sm:table-cell">{t.secret}</TableCell>
                             <TableCell className="hidden sm:table-cell">
                                 <Badge className="text-xs" variant="secondary">
-                                    <Timestamp timestamp={t.created_at || 0} style="YYYY/MM/DD" />
+                                    <Timestamp timestamp={t.createdAt || 0} style="YYYY/MM/DD" />
                                 </Badge>
                             </TableCell>
                             <TableCell className="hidden sm:table-cell">

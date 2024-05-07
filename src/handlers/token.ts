@@ -1,5 +1,7 @@
 import { Handler } from "hono"
 import { sign } from 'hono/jwt'
+import { tokens as Model } from '../schema/schema'
+import { and, desc, eq } from "drizzle-orm"
 
 export const Home:Handler = (c) => {
     const user = c.get('user')
@@ -23,13 +25,11 @@ export const CreateToken:Handler = async (c) => {
         sub: body.name,
         secret: secret,
     }
-    await c.prisma.token.create({
-        data: {
-            user_id: user.uid,
-            name: body.name,
-            secret: secret,
-            created_at: Date.now()
-        }
+    await c.db.insert(Model).values({
+        userId: user.uid,
+        name: body.name,
+        secret: secret,
+        createdAt: Date.now()
     })
     const token = await sign(payload, c.env.API_SECRET, 'HS256')
     return c.json({
@@ -37,21 +37,15 @@ export const CreateToken:Handler = async (c) => {
         token: token,
         name: body.name,
         secret: secret,
-        created_at: Date.now()
+        createdAt: Date.now()
     })
 }
 
 export const ListTokens:Handler = async (c) => {
     const user = c.get('user')
-    const results = await c.prisma.token.findMany({
-        where: {
-            user_id: {
-                equals: user.uid
-            }
-        },
-        orderBy: {
-            id: 'desc',
-        },
+    const results = await c.db.query.tokens.findMany({
+        where: eq(Model.userId, user.uid),
+        orderBy: [desc(Model.id)],
     })
     return c.json({
         tokens: results,
@@ -61,14 +55,7 @@ export const ListTokens:Handler = async (c) => {
 export const DeleteToken:Handler = async (c) => {
     const user = c.get('user')
     const id = parseInt(c.req.param('id'))
-    await c.prisma.token.delete({
-        where: {
-            id: id,
-            user_id: {
-                equals: user.uid,
-            }
-        }
-    })
+    await c.db.delete(Model).where(and(eq(Model.id, id), eq(Model.userId, user.uid)))
     return c.json({
         message: 'Delete successfully'
     })
@@ -77,13 +64,8 @@ export const DeleteToken:Handler = async (c) => {
 export const ResetToken:Handler = async (c) => {
     const user = c.get('user')
     const id = parseInt(c.req.param('id'))
-    const tokenItem = await c.prisma.token.findFirst({
-        where: {
-            id: id,
-            user_id: {
-                equals: user.uid,
-            }
-        }
+    const tokenItem = await c.db.query.tokens.findFirst({
+        where: and(eq(Model.id, id), eq(Model.userId, user.uid))
     })
     if (!tokenItem) {
         return c.json({
@@ -97,23 +79,10 @@ export const ResetToken:Handler = async (c) => {
         sub: tokenItem.name,
         secret: secret,
     }
-    await c.prisma.token.update({
-        where: {
-            id,
-        },
-        data: {
-            secret,
-        }
-    })
-    const results = await c.prisma.token.findMany({
-        where: {
-            user_id: {
-                equals: user.uid
-            }
-        },
-        orderBy: {
-            id: 'desc',
-        },
+    await c.db.update(Model).set({secret}).where(eq(Model.id, id))
+    const results = await c.db.query.tokens.findMany({
+        where: eq(Model.userId, user.uid),
+        orderBy: [desc(Model.id)],
     })
     const token = await sign(payload, c.env.API_SECRET, 'HS256')
     return c.json({
@@ -124,15 +93,9 @@ export const ResetToken:Handler = async (c) => {
 
 export const ApiSetting:Handler = async (c) => {
     const user = c.get('user')
-    const results = await c.prisma.token.findMany({
-        where: {
-            user_id: {
-                equals: user.uid
-            }
-        },
-        orderBy: {
-            id: 'desc',
-        },
+    const results = await c.db.query.tokens.findMany({
+        where: eq(Model.userId, user.uid),
+        orderBy: [desc(Model.id)],
     })
     return c.view('apiSetting', {
         meta: {

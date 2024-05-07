@@ -1,9 +1,10 @@
-import { User } from "@/global"
+import { ListNote, User } from "@/global"
 import { NoteRequest } from "@/lib/opengraph"
 import { sha256 } from "@/lib/utils"
 import { Handler } from "hono"
 import { Index } from "@upstash/vector"
-import { Note } from "@prisma/client"
+import { and, desc, eq, inArray, lt } from "drizzle-orm"
+import { notes as Model } from '../schema/schema'
 
 type NoteFilter = {
     lt: number
@@ -51,21 +52,26 @@ export const NoteHome: Handler = async (c) => {
         }
         idFilter.in = idList
     }
-    let notes:(Note|undefined)[] = await c.prisma.note.findMany({
-        where: {
-            user_id: {
-                equals: user.uid
-            },
-            id: idFilter
+    let notes:(ListNote|undefined)[] = await c.db.query.notes.findMany({
+        columns: {
+            id: true,
+            url: true,
+            title: true,
+            description: true,
+            image: true,
+            excerpt: true,
         },
-        orderBy: {
-            id: 'desc'
-        },
-        skip: 1,
-        take,
+        where: and(
+            eq(Model.userId, user.uid),
+            lt(Model.id, idFilter.lt),
+            idFilter.in ? inArray(Model.id, idFilter.in) : undefined,
+        ),
+        orderBy: [desc(Model.id)],
+        offset: 1,
+        limit: take,
     })
     if (idList.length > 0) {
-        const sortedNotes:(Note|undefined)[] = idList.map((id) => {
+        const sortedNotes:(ListNote|undefined)[] = idList.map((id) => {
             return notes.find((e) => {
                 if (!e) {
                     return false
@@ -98,15 +104,11 @@ export const CreateNote: Handler = async (c) => {
     const user: User = c.get('user')
     const req: NoteRequest = await c.req.json()
     const uriHash = await sha256(req.url)
-    const found = await c.prisma.note.findFirst({
-        where: {
-            uri_hash: {
-                equals: uriHash,
-            },
-            user_id: {
-                equals: user.uid,
-            }
-        }
+    const found = await c.db.query.notes.findFirst({
+        where: and(
+            eq(Model.uriHash, uriHash),
+            eq(Model.userId, user.uid)
+        )
     })
     if (found) {
         return c.json({
@@ -126,38 +128,36 @@ export const CreateNote: Handler = async (c) => {
             image = img.url
         }
     }
-    const note = await c.prisma.note.create({
-        data: {
-            user_id: user.uid,
-            url: req.url,
-            uri_hash: uriHash,
-            length: req.article.length,
-            title: req.article.title,
-            site_name: req.article.siteName || '',
-            lang: req.article.lang || '',
-            dir: req.article.dir || '',
-            byline: req.article.byline || '',
-            excerpt: req.article.excerpt || '',
-            content: req.article.content || '',
-            text_content: req.article.textContent || '',
-            markdown: req.article.markdown || '',
-            published_at: req.article.publishedTime || '',
-            wait_timeout: 0,
-            created_at: Date.now(),
-            description,
-            image,
-            opengraph,
-        }
-    })
+    const note = await c.db.insert(Model).values({
+        userId: user.uid,
+        url: req.url,
+        uriHash: uriHash,
+        length: req.article.length,
+        title: req.article.title,
+        siteName: req.article.siteName || '',
+        lang: req.article.lang || '',
+        dir: req.article.dir || '',
+        byline: req.article.byline || '',
+        excerpt: req.article.excerpt || '',
+        content: req.article.content || '',
+        textContent: req.article.textContent || '',
+        markdown: req.article.markdown || '',
+        publishedAt: req.article.publishedTime || '',
+        waitTimeout: 0,
+        createdAt: Date.now(),
+        description,
+        image,
+        opengraph,
+    }).returning()
     const index = new Index({
         url: c.env.UPSTASH_VECTOR_URL,
         token: c.env.UPSTASH_VECTOR_TOKEN,
     })
     await index.upsert({
-        id: note.id.toString(),
-        data: note.markdown,
+        id: note[0].id.toString(),
+        data: note[0].markdown,
         metadata: {
-            user_id: note.user_id
+            user_id: note[0].userId
         },
     });
     return c.json({

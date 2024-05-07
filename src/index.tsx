@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { renderer } from './renderer'
 import initView from './view'
-import { ViewRenderer, SimpleAuth, Prisma, ApiAuth } from './middleware'
+import { ViewRenderer, SimpleAuth, ApiAuth, Drizzle } from './middleware'
 import { Bindings, Variables } from './global'
 import { CreateToken, ResetToken, Home, ListTokens, DeleteToken, ApiSetting } from './handlers/token'
 import { init } from './lib/init'
@@ -19,7 +19,7 @@ const app = new Hono<{
 }>()
 
 app.use(renderer)
-app.use(Prisma)
+app.use(Drizzle)
 app.use(ViewRenderer)
 app.use('/dashboard/*', SimpleAuth)
 app.use('/api/tokens/*', SimpleAuth)

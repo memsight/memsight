@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { WhiteList } from "@prisma/client";
+import { WhiteList } from '@/global'
 
 type WhiteListItemProps = {
     item: WhiteList

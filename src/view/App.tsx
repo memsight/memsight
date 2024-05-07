@@ -10,7 +10,8 @@ type LayoutProps = {
 }
 
 export default function App({ children, view, manifest }: LayoutProps) {
-    const viewScript = 'var _hono_view = '  + JSON.stringify(view) + ';'
+    const viewData = JSON.stringify(view)
+    const viewScript = 'var _hono_view = JSON.parse(document.querySelector("meta[name=\'view-data\']").getAttribute("content"));'
     let cssDoms:React.ReactNode[] = []
     let scriptDoms:React.ReactNode[] = []
     if (isProd && manifest) {
@@ -46,9 +47,10 @@ export default function App({ children, view, manifest }: LayoutProps) {
                 <link rel="shortcut icon" href="/static/favicon.ico" />
                 <meta name="msapplication-TileColor" content="#00aba9" />
                 <meta name="msapplication-config" content="/static/browserconfig.xml" />
-                <meta name="theme-color" content="#ffffff"></meta>
+                <meta name="theme-color" content="#ffffff" />
                 <title>{view.meta.title}</title>
                 {cssDoms}
+                <meta name="view-data" content={viewData} />
                 <script dangerouslySetInnerHTML={{__html: viewScript}} />
                 {!isProd &&<script type="module" src="http://localhost:5174/src/client.tsx"></script>}
             </head>

@@ -30,7 +30,7 @@ import { useAtom } from 'jotai'
 import { whiteListsAtom, myWhiteListsAtom } from "@/store"
 import BannerUploader from "./BannerUploader"
 import { useCallback } from "react"
-import { WhiteList } from "@prisma/client"
+import { WhiteList } from '@/global'
 import axios from "axios"
 
 const FormSchema = z.object({

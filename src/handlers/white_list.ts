@@ -1,52 +1,39 @@
-import { User } from "@/global"
-import { WhiteList } from "@prisma/client"
-import { equal } from "assert"
+import { User, WhiteList } from "@/global"
+import { whiteLists as Model } from "@/schema/schema"
+import { and, desc, eq, lt } from "drizzle-orm"
 import { Handler } from "hono"
 
-export const WhiteListHome:Handler = async (c) => {
+export const WhiteListHome: Handler = async (c) => {
     const user: User = c.get('user')
     const maxId: string | undefined = c.req.query('id')
     let cursorId = 100000000
     if (maxId) {
         cursorId = parseInt(maxId)
     }
-    const idFilter = {
-        lt: cursorId
-    }
-    const whiteLists = await c.prisma.whiteList.findMany({
-        select: {
+    const whiteLists = await c.db.query.whiteLists.findMany({
+        columns: {
             id: true,
             name: true,
             banner: true,
             desc: true,
-            user_name: true,
-            user_avatar: true
+            userName: true,
+            userAvatar: true
         },
-        where: {
-            id: idFilter
-        },
-        orderBy: {
-            id: 'desc'
-        },
-        take: 64,
+        where: lt(Model.id, cursorId),
+        orderBy: [desc(Model.id)],
+        limit: 64,
     })
-    const myWhiteLists = await c.prisma.whiteList.findMany({
-        select: {
+    const myWhiteLists = await c.db.query.whiteLists.findMany({
+        columns: {
             id: true,
             name: true,
             banner: true,
             desc: true,
-            user_name: true,
-            user_avatar: true
+            userName: true,
+            userAvatar: true
         },
-        where: {
-            user_id: {
-                equals: user.uid
-            }
-        },
-        orderBy: {
-            id: 'desc'
-        }
+        where: eq(Model.userId, user.uid),
+        orderBy: [desc(Model.id)]
     })
     if (c.req.header('Accept')?.includes('application/json')) {
         return c.json({
@@ -66,33 +53,29 @@ export const WhiteListHome:Handler = async (c) => {
     })
 }
 
-export const WhiteListCreate:Handler = async (c) => {
+export const WhiteListCreate: Handler = async (c) => {
     const user: User = c.get('user')
-    const form:WhiteList = await c.req.json()
-    const item = await c.prisma.whiteList.create({
-        data: {
-            user_id: user.uid,
-            user_name: user.name,
-            user_avatar: user.avatar,
-            name: form.name,
-            desc: form.desc,
-            banner: form.banner,
-            content: form.content,
-            created_at: Date.now(),
-        }
-    })
+    const form: WhiteList = await c.req.json()
+    const item = await c.db.insert(Model).values({
+        userId: user.uid,
+        userName: user.name,
+        userAvatar: user.avatar,
+        name: form.name,
+        banner: form.banner,
+        desc: form.desc,
+        content: form.content,
+        createdAt: Date.now(),
+    }).returning()
     return c.json({
-        item,
+        item: item[0],
     })
 }
 
-export const WhiteListShow:Handler = async (c) => {
+export const WhiteListShow: Handler = async (c) => {
     const user: User = c.get('user')
     const widStr: string = c.req.param('wid')
-    const whiteList = await c.prisma.whiteList.findFirst({
-        where: {
-            id: parseInt(widStr)
-        }
+    const whiteList = await c.db.query.whiteLists.findFirst({
+        where: eq(Model.id, parseInt(widStr))
     })
     if (!whiteList) {
         return c.notFound()
@@ -104,18 +87,16 @@ export const WhiteListShow:Handler = async (c) => {
         props: {
             avatar: user.avatar,
             white_list: whiteList,
-            editable: user.uid == whiteList?.user_id
+            editable: user.uid == whiteList.userId
         }
     })
 }
 
-export const WhiteListDelete:Handler = async (c) => {
+export const WhiteListDelete: Handler = async (c) => {
     const user: User = c.get('user')
     const widStr: string = c.req.param('wid')
-    const whiteList = await c.prisma.whiteList.findFirst({
-        where: {
-            id: parseInt(widStr)
-        }
+    const whiteList = await c.db.query.whiteLists.findFirst({
+        where: eq(Model.id, parseInt(widStr))
     })
     if (!whiteList) {
         return c.json({
@@ -123,14 +104,7 @@ export const WhiteListDelete:Handler = async (c) => {
             message: 'white list not found'
         }, 404)
     }
-    await c.prisma.whiteList.delete({
-        where: {
-            id: whiteList.id,
-            user_id: {
-                equals: user.uid
-            }
-        }
-    })
+    await c.db.delete(Model).where(and(eq(Model.id, whiteList.id), eq(Model.userId, user.uid)))
     return c.json({
         code: 0,
         message: "deleted"

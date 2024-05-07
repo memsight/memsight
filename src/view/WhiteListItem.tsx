@@ -1,7 +1,7 @@
 'use client'
 import { Button } from "@/components/ui/button"
 import Dashboard from "./Dashboard"
-import { WhiteList as Model } from "@prisma/client"
+import { WhiteList as Model } from '@/global'
 import { Blocks, Trash } from "lucide-react"
 import {
     AlertDialog,
@@ -118,8 +118,8 @@ export default function WhiteListItem({ children, req_url, white_list, editable,
             <div className="w-full flex flex-row justify-center items-start gap-1">
                 <div className="w-1/3 md:w-1/6 flex flex-col justify-center items-center my-8 border border-dashed shadow rounded-lg overflow-hidden pb-2">
                     <p className="text-xl bg-white font-light w-full py-2 mb-1">Author</p>
-                    <img src={white_list.user_avatar} alt={white_list.user_name} className="rounded-full w-12 h-12" />
-                    <span className="text-sm text-gray-500">{white_list.user_name}</span>
+                    <img src={white_list.userAvatar} alt={white_list.userName} className="rounded-full w-12 h-12" />
+                    <span className="text-sm text-gray-500">{white_list.userName}</span>
                 </div>
                 <div className="w-2/3 md:w-1/2 flex flex-col justify-center my-8 border border-dashed pb-2 bg-gray-200 rounded-lg overflow-hidden">
                     <p className="text-xl bg-muted font-light w-full py-2 mb-1">Rule</p>
