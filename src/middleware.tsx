@@ -1,10 +1,10 @@
-import { User, ViewData } from "./global"
+import { Token, User, ViewData } from "./global"
 import { getViewByName } from "./renderer"
 import manifest from './lib/manifest.json'
 import { getCookie } from "hono/cookie"
 import { verify } from 'hono/jwt'
 import { createMiddleware } from "hono/factory"
-import { PrismaClient, Token } from "@prisma/client/edge"
+import { PrismaClient } from "@prisma/client"
 import { PrismaD1 } from '@prisma/adapter-d1'
 
 let prismaCli: PrismaClient | undefined
@@ -21,12 +21,12 @@ export const ViewRenderer = createMiddleware(async (c, next) => {
 })
 
 export const Prisma = createMiddleware(async (c, next) => {
-    const adapter = new PrismaD1(c.env.DB)
     if (!prismaCli) {
+        const adapter = new PrismaD1(c.env.DB)
         prismaCli = new PrismaClient({ adapter })
+        c.prisma = prismaCli
         console.info('init prisma client')
     }
-    c.prisma = prismaCli
     await next()
 })
 
@@ -36,10 +36,16 @@ export const SimpleAuth = createMiddleware(async (c, next) => {
         authToken = getCookie(c, 'auth-token')
     }
     if (!authToken) {
-        return c.json({
-            status: 401,
-            message: 'You must be logged in to access these resources.'
-        }, 401)
+        const accept = c.req.header('Accept')
+        if (accept?.includes('application/json')) {
+            return c.json({
+                status: 401,
+                message: 'You must be logged in to access these resources.',
+                accept,
+            }, 401)
+        } else {
+            return c.redirect(c.env.LOGIN_URL + '?redirect=' + c.req.url)
+        }
     }
     // validate the auth token
     try {
@@ -51,7 +57,8 @@ export const SimpleAuth = createMiddleware(async (c, next) => {
         if (accept?.includes('application/json')) {
             return c.json({
                 status: 401,
-                message: 'You must be logged in to access these resources.'
+                message: 'You must be logged in to access these resources.',
+                accept,
             }, 401)
         } else {
             return c.redirect(c.env.LOGIN_URL + '?redirect=' + c.req.url)
