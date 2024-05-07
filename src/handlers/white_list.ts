@@ -6,7 +6,7 @@ import { Handler } from "hono"
 export const WhiteListHome: Handler = async (c) => {
     const user: User = c.get('user')
     const maxId: string | undefined = c.req.query('id')
-    let cursorId = 100000000
+    let cursorId = Number.MAX_SAFE_INTEGER
     if (maxId) {
         cursorId = parseInt(maxId)
     }

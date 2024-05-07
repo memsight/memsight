@@ -16,7 +16,7 @@ export const NoteHome: Handler = async (c) => {
     const search: string | undefined = c.req.query('search')
     const scoreStr: string | undefined = c.req.query('score')
     const maxId: string | undefined = c.req.query('id')
-    let cursorId = 100000000
+    let cursorId = Number.MAX_SAFE_INTEGER
     if (maxId && !search) {
         cursorId = parseInt(maxId)
     }
@@ -67,7 +67,6 @@ export const NoteHome: Handler = async (c) => {
             idFilter.in ? inArray(Model.id, idFilter.in) : undefined,
         ),
         orderBy: [desc(Model.id)],
-        offset: 1,
         limit: take,
     })
     if (idList.length > 0) {
