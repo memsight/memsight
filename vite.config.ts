@@ -46,8 +46,6 @@ export default defineConfig(({ mode }) => {
           'react-dom',
           'axios',
           'usehooks-ts',
-          '@prisma/client',
-          '@prisma/debug',
           'react-infinite-scroller'
         ],
       },
