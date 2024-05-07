@@ -43,7 +43,8 @@ export default function WhiteListItem({ children, req_url, white_list, editable,
             whiteList: white_list
         }, '*')
         toast.success('Imported successfully.')
-    }, [])
+        setFound(true)
+    }, [setFound])
     const removeRule = useCallback(() => {
         setFound(false)
         window.postMessage({
