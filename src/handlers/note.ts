@@ -34,6 +34,7 @@ export const NoteHome: Handler = async (c) => {
         const index = new Index({
             url: c.env.UPSTASH_VECTOR_URL,
             token: c.env.UPSTASH_VECTOR_TOKEN,
+            cache: false,
         })
         const results = await index.query({
             data: search,
@@ -138,8 +139,8 @@ export const CreateNote: Handler = async (c) => {
         dir: req.article.dir || '',
         byline: req.article.byline || '',
         excerpt: req.article.excerpt || '',
-        content: req.article.content || '',
-        textContent: req.article.textContent || '',
+        content: '',
+        textContent: '',
         markdown: req.article.markdown || '',
         publishedAt: req.article.publishedTime || '',
         waitTimeout: 0,
@@ -151,6 +152,7 @@ export const CreateNote: Handler = async (c) => {
     const index = new Index({
         url: c.env.UPSTASH_VECTOR_URL,
         token: c.env.UPSTASH_VECTOR_TOKEN,
+        cache: false
     })
     await index.upsert({
         id: note[0].id.toString(),
